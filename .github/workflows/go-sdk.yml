@@ -1,0 +1,28 @@
+name: Go SDK
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go-sdk/go.mod
+          cache-dependency-path: go-sdk/go.sum
+
+      - name: Test
+        run: |
+          cd go-sdk
+          go test ./...
