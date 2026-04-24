@@ -1,6 +1,6 @@
 # OpAgent Protocol
 
-Open protocol definitions and SDKs for OpAgent.
+Operation Agent Protocol (OpAgent Protocol) is a framework for building multi-agent systems. It defines the core protocol and SDKs for composing agents, skills, tools, and subagents into interoperable agent runtimes.
 
 ## Go SDK
 

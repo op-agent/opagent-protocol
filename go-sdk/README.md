@@ -1,6 +1,6 @@
 # OpAgent Protocol Go SDK
 
-Go SDK for building OpAgent protocol clients, servers, agents, tools, and skills integrations.
+Go SDK for Operation Agent Protocol (OpAgent Protocol), a framework for building multi-agent systems with interoperable agents, skills, tools, and subagents.
 
 ## Install
 
@@ -10,7 +10,7 @@ go get github.com/op-agent/opagent-protocol/go-sdk
 
 ## Packages
 
-- `op`: OpAgent protocol API
+- `op`: OpAgent protocol API for agents, skills, tools, subagents, sessions, and transports
 - `auth`: auth helpers
 - `jsonrpc`: JSON-RPC helpers
 
