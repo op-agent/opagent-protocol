@@ -43,7 +43,7 @@ const (
 type ThreadQueueItem struct {
 	ID                   string   `json:"id"`
 	Message              Message  `json:"message"`
-	SelectedSkillKeys    []string `json:"selectedSkillKeys,omitempty"`
+	SelectedSkillIDs     []string `json:"selectedSkillIDs,omitempty"`
 	SelectedSkillContext Meta     `json:"selectedSkillContext,omitempty"`
 	PlanTurn             bool     `json:"planTurn,omitempty"`
 }

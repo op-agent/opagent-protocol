@@ -56,7 +56,6 @@ type UserProfile struct {
 	UID         string `json:"uid,omitempty" mapstructure:"uid"`
 	UserName    string `json:"username,omitempty" mapstructure:"userName"`
 	Email       string `json:"email,omitempty" mapstructure:"email"`
-	Key         string `json:"key,omitempty" mapstructure:"key"`
 	Avatar      string `json:"avatar,omitempty" mapstructure:"avatar"`
 	LocalAvatar string `json:"localAvatar,omitempty" mapstructure:"localAvatar"`
 	Provider    string `json:"provider,omitempty" mapstructure:"provider"`
