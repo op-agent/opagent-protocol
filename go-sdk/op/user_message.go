@@ -41,10 +41,25 @@ func DecodeUserMessageContent(content Content) (Message, error) {
 		if strings.TrimSpace(msg.Content) == "" && len(msg.ContentParts) == 0 {
 			return Message{}, fmt.Errorf("user message requires content or content_parts")
 		}
+		if err := validateTextOnlyUserContentParts(msg.ContentParts); err != nil {
+			return Message{}, err
+		}
 		return msg, nil
 	default:
 		return Message{}, fmt.Errorf("unsupported user content type %T", content)
 	}
+}
+
+func validateTextOnlyUserContentParts(parts []ContentPart) error {
+	for _, part := range parts {
+		switch strings.ToLower(strings.TrimSpace(part.Type)) {
+		case "", "text":
+			// ok
+		default:
+			return fmt.Errorf("user message content_parts only supports text; send images as markdown paths")
+		}
+	}
+	return nil
 }
 
 func summaryText(msg Message) string {

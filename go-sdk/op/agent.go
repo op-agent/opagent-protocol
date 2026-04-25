@@ -34,32 +34,32 @@ var Systools = []string{
 }
 
 type OpNode struct {
-	ID      string   `json:"id"`                                     // short node id, e.g. agent-ab12
-	Key     string   `json:"key"`                                    // uid:hostID:kind:uri
+	ID      string   `json:"id"`                                     // persistent node id, e.g. agent-cm1...
 	HostID  string   `json:"hostID,omitempty" mapstructure:"hostID"` // host id
 	UID     string   `json:"uid"`                                    // owner/tenant identifier
 	OpCodes []OpCode `json:"opCodes,omitempty"`
 	Kind    string   `json:"kind"` // agent | skill | tools
 	URI     string   `json:"uri"`  // resource locator (file://, cloudos://, ...)
-	Cwd     string   `json:"cwd"`  // current working directory
+	Path    string   `json:"path,omitempty"`
+	Cwd     string   `json:"cwd"` // current working directory
 	Tags    []string `json:"tags,omitempty"`
 	Run     Run      `json:"run,omitempty"`
 	Meta    any      `json:"meta,omitempty"` // AgentMeta | SkillMeta | ToolsMeta
 }
 
 // ---------------------------------------------------------------------------
-// Identity format: uid:hostID:kind:uri
+// Node identity format: uid:hostID:kind:uri
 //
 // Examples:
-//   local:   local:host-a1b2:agent:file:///example/.opagent/agents/li/.agent/AGENT.md
-//   local:   local:host-a1b2:tools:file:///example/.opagent/tools/system-tools/TOOLS.md
-//   cloud:   user123:host-c3d4:skill:file:///example/skills/search/SKILL.md
+//   local:   local:host-a1b2:agent:file:///root/.opagent/agents/li/.agent/AGENT.md
+//   local:   local:host-a1b2:tools:file:///root/.opagent/tools/system-tools/TOOLS.md
+//   cloud:   user123:host-c3d4:skill:file:///home/user/skills/search/SKILL.md
 //
 // The first three colons delimit uid, hostID and kind.
 // Everything after the third colon is the URI (catch-all, may contain colons).
 // ---------------------------------------------------------------------------
 
-func BuildKey(uid, hostID, kind, uri string, env string) string {
+func BuildNodeIdentity(uid, hostID, kind, uri string, env string) string {
 	if env == EnvLocal {
 		uid = "local"
 	}
@@ -76,37 +76,14 @@ func NormalizeNodeKind(kind string) string {
 	return strings.ToLower(strings.TrimSpace(kind))
 }
 
-func SplitKey(key string) (uid, hostID, kind, uri string, ok bool) {
-	key = strings.TrimSpace(key)
-	if key == "" {
-		return "", "", "", "", false
+func NodeKindFromID(id string) (NodeKind, bool) {
+	trimmed := strings.TrimSpace(id)
+	for _, kind := range []NodeKind{NodeKindAgent, NodeKindSkill, NodeKindTools} {
+		if strings.HasPrefix(trimmed, string(kind)+"-") {
+			return kind, true
+		}
 	}
-	parts := strings.SplitN(key, ":", 4) // uid:hostID:kind:uri
-	if len(parts) < 4 {
-		return "", "", "", "", false
-	}
-	uid = strings.TrimSpace(parts[0])
-	hostID = strings.TrimSpace(parts[1])
-	kind = strings.TrimSpace(parts[2])
-	uri = strings.TrimSpace(parts[3])
-	if uid == "" || hostID == "" || kind == "" || uri == "" {
-		return "", "", "", "", false
-	}
-	return uid, hostID, kind, uri, true
-}
-
-func NodeKindFromKey(key string) (NodeKind, bool) {
-	_, _, rawKind, _, ok := SplitKey(key)
-	if !ok {
-		return NodeKind(""), false
-	}
-	kind := NodeKind(NormalizeNodeKind(rawKind))
-	switch kind {
-	case NodeKindAgent, NodeKindSkill, NodeKindTools:
-		return kind, true
-	default:
-		return NodeKind(""), false
-	}
+	return NodeKind(""), false
 }
 
 // ComputeNodeID returns a short deterministic id suffix from identity.
@@ -127,19 +104,31 @@ func BuildNodeID(uid, hostID string, kind NodeKind, uri string, env string) stri
 	default:
 		normalizedKind = strings.TrimSpace(string(kind))
 	}
-	identity := BuildKey(strings.TrimSpace(uid), strings.TrimSpace(hostID), normalizedKind, strings.TrimSpace(uri), env)
+	identity := BuildNodeIdentity(strings.TrimSpace(uid), strings.TrimSpace(hostID), normalizedKind, strings.TrimSpace(uri), env)
 	return normalizedKind + "-" + ComputeNodeID(identity)
 }
 
+func NewNodeID(kind NodeKind) string {
+	normalizedKind := NormalizeNodeKind(string(kind))
+	switch NodeKind(normalizedKind) {
+	case NodeKindAgent, NodeKindSkill, NodeKindTools:
+	default:
+		normalizedKind = "node"
+	}
+	return normalizedKind + "-" + xid.New().String()
+}
+
 func BuildNode(uid, hostID string, kind NodeKind, uri string, env string, tags []string, run Run, opCodes []OpCode, meta any) *OpNode {
+	path := URIToPath(uri)
+	id := NewNodeID(kind)
 	return &OpNode{
-		ID:      BuildNodeID(uid, hostID, kind, uri, env),
-		Key:     BuildKey(uid, hostID, string(kind), uri, env),
+		ID:      id,
 		HostID:  strings.TrimSpace(hostID),
 		UID:     uid,
 		OpCodes: opCodes,
 		Kind:    string(kind),
 		URI:     uri,
+		Path:    path,
 		Tags:    tags,
 		Run:     run,
 		Meta:    meta,

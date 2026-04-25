@@ -2,38 +2,29 @@ package op
 
 import "testing"
 
-func TestBuildKeyIncludesHostID(t *testing.T) {
-	key := BuildKey("user123", "devbox-a1b2", string(NodeKindAgent), "file:///tmp/a:1/AGENT.md", EnvCloud)
+func TestBuildNodeIdentityIncludesHostID(t *testing.T) {
+	identity := BuildNodeIdentity("user123", "devbox-a1b2", string(NodeKindAgent), "file:///tmp/a:1/AGENT.md", EnvCloud)
 	want := "user123:devbox-a1b2:agent:file:///tmp/a:1/AGENT.md"
-	if key != want {
-		t.Fatalf("BuildKey() = %q, want %q", key, want)
+	if identity != want {
+		t.Fatalf("BuildNodeIdentity() = %q, want %q", identity, want)
 	}
 }
 
-func TestBuildKeyLocalForcesLocalUID(t *testing.T) {
-	key := BuildKey("alice", "devbox-a1b2", string(NodeKindSkill), "file:///tmp/SKILL.md", EnvLocal)
+func TestBuildNodeIdentityLocalForcesLocalUID(t *testing.T) {
+	identity := BuildNodeIdentity("alice", "devbox-a1b2", string(NodeKindSkill), "file:///tmp/SKILL.md", EnvLocal)
 	want := "local:devbox-a1b2:skill:file:///tmp/SKILL.md"
-	if key != want {
-		t.Fatalf("BuildKey() = %q, want %q", key, want)
+	if identity != want {
+		t.Fatalf("BuildNodeIdentity() = %q, want %q", identity, want)
 	}
 }
 
-func TestSplitKeyAndNodeKindFromKey(t *testing.T) {
-	key := "user1:host-x9k2:tools:file:///tmp/tools/TOOLS.md"
-	uid, hostID, kind, uri, ok := SplitKey(key)
+func TestNodeKindFromID(t *testing.T) {
+	nodeKind, ok := NodeKindFromID("tools-c123")
 	if !ok {
-		t.Fatalf("SplitKey() should parse key: %q", key)
-	}
-	if uid != "user1" || hostID != "host-x9k2" || kind != "tools" || uri != "file:///tmp/tools/TOOLS.md" {
-		t.Fatalf("SplitKey() parsed unexpected values: uid=%q hostID=%q kind=%q uri=%q", uid, hostID, kind, uri)
-	}
-
-	nodeKind, ok := NodeKindFromKey(key)
-	if !ok {
-		t.Fatalf("NodeKindFromKey() should parse key: %q", key)
+		t.Fatalf("NodeKindFromID() should parse prefixed id")
 	}
 	if nodeKind != NodeKindTools {
-		t.Fatalf("NodeKindFromKey() = %q, want %q", nodeKind, NodeKindTools)
+		t.Fatalf("NodeKindFromID() = %q, want %q", nodeKind, NodeKindTools)
 	}
 }
 

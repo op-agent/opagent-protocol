@@ -10,7 +10,7 @@ type EditorCompletionBlock struct {
 
 type EditorCompletionRequest struct {
 	RequestID       string                 `json:"requestID"`
-	AgentKey        string                 `json:"agentKey,omitempty"`
+	AgentID         string                 `json:"agentID,omitempty"`
 	ModelKey        string                 `json:"modelKey,omitempty"`
 	ThinkingLevel   string                 `json:"thinkingLevel,omitempty"`
 	EditorKind      string                 `json:"editorKind,omitempty"`

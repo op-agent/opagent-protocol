@@ -7,7 +7,7 @@ type SessionHeader struct {
 	Version           int    `json:"version"`
 	ID                string `json:"id"`
 	Timestamp         string `json:"timestamp"`
-	AgentKey          string `json:"agentKey"`
+	AgentID           string `json:"agentID"`
 	CWD               string `json:"cwd"`
 	ChatPath          string `json:"chatPath"`
 	FileID            string `json:"fileID,omitempty"`
@@ -57,7 +57,7 @@ type SessionCompactionEntry struct {
 }
 
 type ChatSessionCreateParams struct {
-	AgentKey string `json:"agentKey"`
+	AgentID  string `json:"agentID"`
 	CWD      string `json:"cwd"`
 	ChatPath string `json:"chatPath"`
 	FileID   string `json:"fileID,omitempty"`
@@ -77,13 +77,13 @@ type ChatSessionMetaQuery struct {
 	ThreadID string `json:"threadID,omitempty"`
 	FileID   string `json:"fileID,omitempty"`
 	ChatPath string `json:"chatPath,omitempty"`
-	AgentKey string `json:"agentKey,omitempty"`
+	AgentID  string `json:"agentID,omitempty"`
 }
 
 type ChatSessionMeta struct {
 	ThreadID          string `json:"threadID"`
 	FileID            string `json:"fileID,omitempty"`
-	AgentKey          string `json:"agentKey"`
+	AgentID           string `json:"agentID"`
 	CWD               string `json:"cwd"`
 	Path              string `json:"path,omitempty"`
 	ChatPath          string `json:"chatPath,omitempty"`
@@ -107,7 +107,7 @@ type ChatSessionForkParams struct {
 	SourceThreadID    string `json:"sourceThreadID,omitempty"`
 	SourceFileID      string `json:"sourceFileID,omitempty"`
 	SourceChatPath    string `json:"sourceChatPath,omitempty"`
-	AgentKey          string `json:"agentKey,omitempty"`
+	AgentID           string `json:"agentID,omitempty"`
 	CWD               string `json:"cwd,omitempty"`
 	FileID            string `json:"fileID,omitempty"`
 	ChatPath          string `json:"chatPath,omitempty"`
@@ -127,7 +127,7 @@ type TurnResultPayload struct {
 	ThreadID          string                 `json:"threadID"`
 	FileID            string                 `json:"fileID,omitempty"`
 	TurnID            string                 `json:"turnID"`
-	AgentKey          string                 `json:"agentKey"`
+	AgentID           string                 `json:"agentID"`
 	Path              string                 `json:"path,omitempty"`
 	ChatPath          string                 `json:"chatPath,omitempty"`
 	Title             string                 `json:"title"`

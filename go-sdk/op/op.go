@@ -8,9 +8,8 @@ import (
 )
 
 type GeneralContent struct {
-	Content Content  `json:"content"`
-	Meta    Meta     `json:"meta,omitempty"`
-	Images  []string `json:"images,omitempty"`
+	Content Content `json:"content"`
+	Meta    Meta    `json:"meta,omitempty"`
 }
 
 func (p *GeneralContent) UnmarshalJSON(data []byte) error {

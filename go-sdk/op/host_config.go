@@ -33,11 +33,12 @@ type SystemConfig struct {
 }
 
 type UserConfig struct {
-	DefaultModelKey string             `json:"defaultModelKey,omitempty" mapstructure:"defaultModelKey"`
-	Profile *UserProfile      `json:"profile,omitempty" mapstructure:"profile"`
-	Auth    *AuthConfig       `json:"auth,omitempty" mapstructure:"auth"`
-	Models  []ModelConfig     `json:"models,omitempty" mapstructure:"models"`
-	Nodes   map[string]OpNode `json:"nodes,omitempty" mapstructure:"nodes"` // map(nodeKey)OpNode
+	DefaultModelKey string            `json:"defaultModelKey,omitempty" mapstructure:"defaultModelKey"`
+	ServiceTier     *string           `json:"serviceTier,omitempty" mapstructure:"serviceTier"`
+	Profile         *UserProfile      `json:"profile,omitempty" mapstructure:"profile"`
+	Auth            *AuthConfig       `json:"auth,omitempty" mapstructure:"auth"`
+	Models          []ModelConfig     `json:"models,omitempty" mapstructure:"models"`
+	Nodes           map[string]OpNode `json:"nodes,omitempty" mapstructure:"nodes"` // map(nodeID)OpNode
 }
 
 type AuthConfig struct {
@@ -165,20 +166,20 @@ type HostSecretGetResponse struct {
 
 // --------------- model --------------------
 type ModelConfig struct {
-	Key             string   `json:"key,omitempty"`
-	ID              string   `json:"id"`
-	Name            string   `json:"name"`
-	Provider        string   `json:"provider"`
-	API             string   `json:"api,omitempty"`
-	APIKey          string   `json:"apiKey"`
-	BaseURL         string   `json:"baseURL,omitempty"`
-	ContextWindow   int64    `json:"contextWindow,omitempty"`
-	MaxOutputTokens int64    `json:"maxOutputTokens,omitempty"`
-	Reasoning       bool     `json:"reasoning,omitempty"`
-	ReasoningControl string  `json:"reasoningControl,omitempty"`
-	ReasoningLevels []string `json:"reasoningLevels,omitempty"`
-	Enabled         bool     `json:"enabled,omitempty"`
-	Source          string   `json:"source,omitempty"` // gateway | custom
+	Key              string   `json:"key,omitempty"`
+	ID               string   `json:"id"`
+	Name             string   `json:"name"`
+	Provider         string   `json:"provider"`
+	API              string   `json:"api,omitempty"`
+	APIKey           string   `json:"apiKey"`
+	BaseURL          string   `json:"baseURL,omitempty"`
+	ContextWindow    int64    `json:"contextWindow,omitempty"`
+	MaxOutputTokens  int64    `json:"maxOutputTokens,omitempty"`
+	Reasoning        bool     `json:"reasoning,omitempty"`
+	ReasoningControl string   `json:"reasoningControl,omitempty"`
+	ReasoningLevels  []string `json:"reasoningLevels,omitempty"`
+	Enabled          bool     `json:"enabled,omitempty"`
+	Source           string   `json:"source,omitempty"` // gateway | custom
 }
 
 type TokenUsage struct {
