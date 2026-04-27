@@ -17,6 +17,16 @@ const (
 	ChatReviewTurnRolledBack ChatReviewTurnStatus = "rolledBack"
 )
 
+type ChatReviewMergeState string
+
+const (
+	ChatReviewMergeClean      ChatReviewMergeState = "clean"
+	ChatReviewMergeUserEdited ChatReviewMergeState = "userEdited"
+	ChatReviewMergeUserUndone ChatReviewMergeState = "userUndone"
+	ChatReviewMergeConflicted ChatReviewMergeState = "conflicted"
+	ChatReviewMergeMissing    ChatReviewMergeState = "missing"
+)
+
 type ChatReviewDecision string
 
 const (
@@ -38,15 +48,29 @@ type ChatReviewLineRange struct {
 	EndLine   int `json:"endLine"`
 }
 
+type ChatReviewHunk struct {
+	OldStartLine int      `json:"oldStartLine"`
+	OldLineCount int      `json:"oldLineCount"`
+	NewStartLine int      `json:"newStartLine"`
+	NewLineCount int      `json:"newLineCount"`
+	RemovedLines []string `json:"removedLines,omitempty"`
+	AddedLines   []string `json:"addedLines,omitempty"`
+}
+
 type ChatReviewFile struct {
 	Path               string                `json:"path"`
 	Status             ChatReviewFileStatus  `json:"status"`
+	MergeState         ChatReviewMergeState  `json:"mergeState,omitempty"`
+	HasUserEdits       bool                  `json:"hasUserEdits,omitempty"`
+	CanUndo            bool                  `json:"canUndo,omitempty"`
+	ConflictMessage    string                `json:"conflictMessage,omitempty"`
 	Diff               string                `json:"diff"`
 	BaselineExists     bool                  `json:"baselineExists"`
 	FirstChangedLine   int                   `json:"firstChangedLine,omitempty"`
 	FirstChangedColumn int                   `json:"firstChangedColumn,omitempty"`
 	LineCount          int                   `json:"lineCount,omitempty"`
 	ChangedRanges      []ChatReviewLineRange `json:"changedRanges,omitempty"`
+	Hunks              []ChatReviewHunk      `json:"hunks,omitempty"`
 }
 
 type ChatReviewState struct {
@@ -61,6 +85,7 @@ type ChatReviewState struct {
 	ApprovedCount   int                  `json:"approvedCount"`
 	RejectedCount   int                  `json:"rejectedCount"`
 	RolledBackCount int                  `json:"rolledBackCount"`
+	ConflictCount   int                  `json:"conflictCount,omitempty"`
 	Files           []ChatReviewFile     `json:"files"`
 }
 

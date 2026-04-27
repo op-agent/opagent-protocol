@@ -2,14 +2,13 @@ package op
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/base32"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rs/xid"
 )
 
@@ -40,8 +39,7 @@ type OpNode struct {
 	OpCodes []OpCode `json:"opCodes,omitempty"`
 	Kind    string   `json:"kind"` // agent | skill | tools
 	URI     string   `json:"uri"`  // resource locator (file://, cloudos://, ...)
-	Path    string   `json:"path,omitempty"`
-	Cwd     string   `json:"cwd"` // current working directory
+	Cwd     string   `json:"cwd"`  // current working directory
 	Tags    []string `json:"tags,omitempty"`
 	Run     Run      `json:"run,omitempty"`
 	Meta    any      `json:"meta,omitempty"` // AgentMeta | SkillMeta | ToolsMeta
@@ -67,10 +65,10 @@ func BuildNodeIdentity(uid, hostID, kind, uri string, env string) string {
 }
 
 // ---------------------------------------------------------------------------
-// Node ID — short deterministic id with kind prefix.
+// Node ID — deterministic UUIDv5 with kind prefix.
 // ---------------------------------------------------------------------------
 
-const shortNodeIDSuffixLength = 4
+var nodeIDNamespace = uuid.NewSHA1(uuid.NameSpaceDNS, []byte("OpAgent"))
 
 func NormalizeNodeKind(kind string) string {
 	return strings.ToLower(strings.TrimSpace(kind))
@@ -86,41 +84,25 @@ func NodeKindFromID(id string) (NodeKind, bool) {
 	return NodeKind(""), false
 }
 
-// ComputeNodeID returns a short deterministic id suffix from identity.
+// ComputeNodeID returns a deterministic UUIDv5 suffix from identity.
 func ComputeNodeID(identity string) string {
-	sum := sha1.Sum([]byte(strings.TrimSpace(identity)))
-	encoded := strings.ToLower(base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(sum[:]))
-	if len(encoded) < shortNodeIDSuffixLength {
-		return encoded
-	}
-	return encoded[:shortNodeIDSuffixLength]
+	return uuid.NewSHA1(nodeIDNamespace, []byte(strings.TrimSpace(identity))).String()
 }
 
-// BuildNodeID builds id in `kind-xxxx` format from uid/hostID/kind/uri.
+// BuildNodeID builds id in `kind-uuidv5` format from uid/hostID/kind/uri.
 func BuildNodeID(uid, hostID string, kind NodeKind, uri string, env string) string {
 	normalizedKind := NormalizeNodeKind(string(kind))
-	switch NodeKind(kind) {
+	switch NodeKind(normalizedKind) {
 	case NodeKindAgent, NodeKindSkill, NodeKindTools:
 	default:
-		normalizedKind = strings.TrimSpace(string(kind))
+		normalizedKind = strings.TrimSpace(normalizedKind)
 	}
 	identity := BuildNodeIdentity(strings.TrimSpace(uid), strings.TrimSpace(hostID), normalizedKind, strings.TrimSpace(uri), env)
 	return normalizedKind + "-" + ComputeNodeID(identity)
 }
 
-func NewNodeID(kind NodeKind) string {
-	normalizedKind := NormalizeNodeKind(string(kind))
-	switch NodeKind(normalizedKind) {
-	case NodeKindAgent, NodeKindSkill, NodeKindTools:
-	default:
-		normalizedKind = "node"
-	}
-	return normalizedKind + "-" + xid.New().String()
-}
-
 func BuildNode(uid, hostID string, kind NodeKind, uri string, env string, tags []string, run Run, opCodes []OpCode, meta any) *OpNode {
-	path := URIToPath(uri)
-	id := NewNodeID(kind)
+	id := BuildNodeID(uid, hostID, kind, uri, env)
 	return &OpNode{
 		ID:      id,
 		HostID:  strings.TrimSpace(hostID),
@@ -128,7 +110,6 @@ func BuildNode(uid, hostID string, kind NodeKind, uri string, env string, tags [
 		OpCodes: opCodes,
 		Kind:    string(kind),
 		URI:     uri,
-		Path:    path,
 		Tags:    tags,
 		Run:     run,
 		Meta:    meta,

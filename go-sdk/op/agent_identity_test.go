@@ -34,10 +34,22 @@ func TestBuildNodeIDStableAndKindPrefixed(t *testing.T) {
 	if id1 != id2 {
 		t.Fatalf("BuildNodeID() should be stable, got %q and %q", id1, id2)
 	}
-	if len(id1) != len("agent-xxxx") {
-		t.Fatalf("BuildNodeID() should be short, got %q", id1)
+	if len(id1) != len("agent-00000000-0000-0000-0000-000000000000") {
+		t.Fatalf("BuildNodeID() should be uuid-prefixed, got %q", id1)
 	}
 	if id1[:6] != "agent-" {
 		t.Fatalf("BuildNodeID() should have kind prefix, got %q", id1)
+	}
+}
+
+func TestBuildNodeUsesDeterministicNodeID(t *testing.T) {
+	uri := "file:///tmp/a/.agent/AGENT.md"
+	node1 := BuildNode("user1", "host-z7m3", NodeKindAgent, uri, EnvCloud, nil, Run{}, nil, &AgentMeta{Name: "a"})
+	node2 := BuildNode("user1", "host-z7m3", NodeKindAgent, uri, EnvCloud, nil, Run{}, nil, &AgentMeta{Name: "a"})
+	if node1.ID != node2.ID {
+		t.Fatalf("BuildNode() should be deterministic, got %q and %q", node1.ID, node2.ID)
+	}
+	if node1.ID != BuildNodeID("user1", "host-z7m3", NodeKindAgent, uri, EnvCloud) {
+		t.Fatalf("BuildNode() ID = %q, want BuildNodeID()", node1.ID)
 	}
 }
